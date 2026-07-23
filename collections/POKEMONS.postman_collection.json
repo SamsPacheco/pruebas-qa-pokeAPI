@@ -1,0 +1,373 @@
+{
+  "info": {
+    "_postman_id": "a0784069-160b-41d1-be15-2904a3d5e540",
+    "name": "POKEMONS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "37933491"
+  },
+  "item": [
+    {
+      "name": "GET - Pokemon por Id /  Nombre",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Happy path",
+              "",
+              "// 1. Validar Código de Estado HTTP",
+              "pm.test(\"CP-003: Validar que el código de estado sea 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// 2. Validar que la respuesta sea un JSON válido y verificar tipos de datos",
+              "pm.test(\"CP-004: Validar datos principales del Pokémon\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    ",
+              "    // Validar propiedades específicas y sus tipos de datos (Evitar falsos positivos)",
+              "    pm.expect(jsonData.id).to.be.a('number');",
+              "    pm.expect(jsonData.name).to.equal(\"pikachu\");",
+              "    pm.expect(jsonData.abilities).to.be.an('array');",
+              "});",
+              "",
+              "// 3. Validación de Esquema JSON (Estructura de Contrato)",
+              "pm.test(\"CP-005: Validar que el esquema JSON contenga las llaves requeridas\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    ",
+              "    // Verificación de la estructura del contrato técnico exigido en la guía",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('name');",
+              "    pm.expect(jsonData).to.have.property('sprites');",
+              "    pm.expect(jsonData).to.have.property('types');",
+              "});",
+              "",
+              "pm.test(\"CP-004-F: Validar datos principales del Pokémon (FORZAR FALLO)\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    ",
+              "    // El nombre real en la API es \"pikachu\" (minúscula). ",
+              "    // Al evaluar con \"Pikachu\" (Mayúscula), la aserción va a fallar inmediatamente.",
+              "    pm.expect(jsonData.name).to.equal(\"Pikachu\"); ",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://pokeapi.co/api/v2/pokemon/pikachu",
+          "protocol": "https",
+          "host": [
+            "pokeapi",
+            "co"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "pokemon",
+            "pikachu"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Not Found",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Validar Código de Estado de Error controlado",
+              "pm.test(\"CP-006: Validar que el código de estado sea 404 Not Found\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "// 2. Validar que el cuerpo responda con el manejo de excepción de la API",
+              "pm.test(\"CP-007: Validar que el cuerpo de la respuesta sea un texto o JSON controlado\", function () {",
+              "    // La PokeAPI suele retornar la cadena \"Not Found\" directamente",
+              "    pm.expect(pm.response.text()).to.include(\"Not Found\");",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://pokeapi.co/api/v2/pokemon/pokemon-no-existente",
+          "protocol": "https",
+          "host": [
+            "pokeapi",
+            "co"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "pokemon",
+            "pokemon-no-existente"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Paginacion (limit / offset)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Escenario: Paginación del listado general de Pokémon",
+              "",
+              "// 1. Validar Código de Estado HTTP",
+              "pm.test(\"CP-008: Validar que el código de estado sea 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// 2. Validar la estructura del contrato de paginación",
+              "pm.test(\"CP-009: Validar estructura de paginación (count, next, previous, results)\", function () {",
+              "    var jsonData = pm.response.json();",
+              "",
+              "    pm.expect(jsonData).to.have.property('count');",
+              "    pm.expect(jsonData.count).to.be.a('number');",
+              "    pm.expect(jsonData).to.have.property('results');",
+              "    pm.expect(jsonData.results).to.be.an('array');",
+              "    // En la primera página (offset=0) no debe existir página anterior",
+              "    pm.expect(jsonData.previous).to.be.null;",
+              "});",
+              "",
+              "// 3. Validar que el parámetro ?limit= se respete estrictamente",
+              "pm.test(\"CP-010: Validar que la cantidad de resultados coincida con el parámetro limit\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var limitSolicitado = parseInt(pm.request.url.query.get('limit'));",
+              "",
+              "    pm.expect(jsonData.results.length).to.equal(limitSolicitado);",
+              "});",
+              "",
+              "// 4. Validar la forma de cada elemento dentro del array (contrato por ítem)",
+              "pm.test(\"CP-011: Validar que cada resultado tenga name y url válidos\", function () {",
+              "    var jsonData = pm.response.json();",
+              "",
+              "    jsonData.results.forEach(function (pokemon) {",
+              "        pm.expect(pokemon.name).to.be.a('string').and.not.be.empty;",
+              "        pm.expect(pokemon.url).to.match(/^https:\\/\\/pokeapi\\.co\\/api\\/v2\\/pokemon\\/\\d+\\/$/);",
+              "    });",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://pokeapi.co/api/v2/pokemon?limit=20&offset=0",
+          "protocol": "https",
+          "host": [
+            "pokeapi",
+            "co"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "pokemon"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "20"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Pokemon por ID numerico",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Escenario: Búsqueda por ID numérico en lugar de nombre",
+              "",
+              "// 1. Validar Código de Estado HTTP",
+              "pm.test(\"CP-012: Validar que el código de estado sea 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// 2. Validar consistencia de contrato: buscar por ID 25 debe devolver el mismo",
+              "//    recurso que buscar por nombre \"pikachu\" (ambos identifican al mismo Pokémon)",
+              "pm.test(\"CP-013: Validar consistencia entre búsqueda por ID y por nombre\", function () {",
+              "    var jsonData = pm.response.json();",
+              "",
+              "    pm.expect(jsonData.id).to.equal(25);",
+              "    pm.expect(jsonData.name).to.equal(\"pikachu\");",
+              "});",
+              "",
+              "// 3. Validar tipos de datos numéricos propios de este recurso",
+              "pm.test(\"CP-014: Validar tipos de datos numéricos (height, weight, base_experience)\", function () {",
+              "    var jsonData = pm.response.json();",
+              "",
+              "    pm.expect(jsonData.height).to.be.a('number');",
+              "    pm.expect(jsonData.weight).to.be.a('number');",
+              "    pm.expect(jsonData.base_experience).to.be.a('number');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://pokeapi.co/api/v2/pokemon/25",
+          "protocol": "https",
+          "host": [
+            "pokeapi",
+            "co"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "pokemon",
+            "25"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Rendimiento (Response Time)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Escenario: Prueba de rendimiento / tiempo de respuesta",
+              "",
+              "// 1. Validar Código de Estado HTTP",
+              "pm.test(\"CP-015: Validar que el código de estado sea 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// 2. Validar que el tiempo de respuesta esté dentro del presupuesto aceptable (SLA)",
+              "pm.test(\"CP-016: Validar que el tiempo de respuesta sea menor a 500ms\", function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(500);",
+              "});",
+              "",
+              "// 3. Validar que el servidor declare correctamente el tipo de contenido",
+              "pm.test(\"CP-017: Validar que el header Content-Type sea application/json\", function () {",
+              "    pm.response.to.have.header(\"Content-Type\");",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://pokeapi.co/api/v2/pokemon/ditto",
+          "protocol": "https",
+          "host": [
+            "pokeapi",
+            "co"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "pokemon",
+            "ditto"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Recurso relacionado (Type)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Escenario: Validar un recurso relacionado (integridad referencial)",
+              "// Un tipo (ej. \"electric\") debe listar Pokémon que realmente pertenecen a ese tipo",
+              "",
+              "// 1. Validar Código de Estado HTTP",
+              "pm.test(\"CP-018: Validar que el código de estado sea 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// 2. Validar la estructura del contrato del recurso \"type\"",
+              "pm.test(\"CP-019: Validar estructura de damage_relations y del array pokemon\", function () {",
+              "    var jsonData = pm.response.json();",
+              "",
+              "    pm.expect(jsonData).to.have.property('damage_relations');",
+              "    pm.expect(jsonData.damage_relations).to.have.all.keys(",
+              "        'double_damage_from', 'double_damage_to',",
+              "        'half_damage_from', 'half_damage_to',",
+              "        'no_damage_from', 'no_damage_to'",
+              "    );",
+              "    pm.expect(jsonData.pokemon).to.be.an('array').that.is.not.empty;",
+              "});",
+              "",
+              "// 3. Validar integridad referencial: Pikachu debe pertenecer al tipo eléctrico",
+              "pm.test(\"CP-020: Validar que Pikachu exista dentro del listado de Pokémon del tipo\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var nombres = jsonData.pokemon.map(function (entry) { return entry.pokemon.name; });",
+              "",
+              "    pm.expect(nombres).to.include(\"pikachu\");",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://pokeapi.co/api/v2/type/electric",
+          "protocol": "https",
+          "host": [
+            "pokeapi",
+            "co"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "type",
+            "electric"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

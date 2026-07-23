@@ -1,0 +1,16 @@
+{
+  "name": "pruebas-qa-pokeapi",
+  "version": "1.0.0",
+  "description": "Automatización de pruebas de la PokeAPI usando Newman (CLI de Postman)",
+  "scripts": {
+    "test": "newman run collections/POKEMONS.postman_collection.json",
+    "test:report": "newman run collections/POKEMONS.postman_collection.json -r htmlextra --reporter-htmlextra-export reports/report.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "newman": "^6.2.2",
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}
