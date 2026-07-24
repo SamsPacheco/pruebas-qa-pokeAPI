@@ -66,16 +66,8 @@
         "url": {
           "raw": "https://pokeapi.co/api/v2/pokemon/pikachu",
           "protocol": "https",
-          "host": [
-            "pokeapi",
-            "co"
-          ],
-          "path": [
-            "api",
-            "v2",
-            "pokemon",
-            "pikachu"
-          ]
+          "host": ["pokeapi", "co"],
+          "path": ["api", "v2", "pokemon", "pikachu"]
         }
       },
       "response": []
@@ -115,16 +107,8 @@
         "url": {
           "raw": "https://pokeapi.co/api/v2/pokemon/pokemon-no-existente",
           "protocol": "https",
-          "host": [
-            "pokeapi",
-            "co"
-          ],
-          "path": [
-            "api",
-            "v2",
-            "pokemon",
-            "pokemon-no-existente"
-          ]
+          "host": ["pokeapi", "co"],
+          "path": ["api", "v2", "pokemon", "pokemon-no-existente"]
         }
       },
       "response": []
@@ -193,15 +177,8 @@
         "url": {
           "raw": "https://pokeapi.co/api/v2/pokemon?limit=0&offset=0",
           "protocol": "https",
-          "host": [
-            "pokeapi",
-            "co"
-          ],
-          "path": [
-            "api",
-            "v2",
-            "pokemon"
-          ],
+          "host": ["pokeapi", "co"],
+          "path": ["api", "v2", "pokemon"],
           "query": [
             {
               "key": "limit",
@@ -265,16 +242,8 @@
         "url": {
           "raw": "https://pokeapi.co/api/v2/pokemon/25",
           "protocol": "https",
-          "host": [
-            "pokeapi",
-            "co"
-          ],
-          "path": [
-            "api",
-            "v2",
-            "pokemon",
-            "25"
-          ]
+          "host": ["pokeapi", "co"],
+          "path": ["api", "v2", "pokemon", "25"]
         }
       },
       "response": []
@@ -325,16 +294,8 @@
         "url": {
           "raw": "https://pokeapi.co/api/v2/pokemon/ditto",
           "protocol": "https",
-          "host": [
-            "pokeapi",
-            "co"
-          ],
-          "path": [
-            "api",
-            "v2",
-            "pokemon",
-            "ditto"
-          ]
+          "host": ["pokeapi", "co"],
+          "path": ["api", "v2", "pokemon", "ditto"]
         }
       },
       "response": []
@@ -397,16 +358,54 @@
         "url": {
           "raw": "https://pokeapi.co/api/v2/type/electric",
           "protocol": "https",
-          "host": [
-            "pokeapi",
-            "co"
-          ],
-          "path": [
-            "api",
-            "v2",
-            "type",
-            "electric"
-          ]
+          "host": ["pokeapi", "co"],
+          "path": ["api", "v2", "type", "electric"]
+        }
+      },
+      "response": []
+    },
+
+    {
+      "name": "GET - Pokemon Species (Validación de Idioma)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Validar que la respuesta sea correcta",
+              "pm.test(\"CP-021: Validar código de estado 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// 2. Validar que exista al menos una traducción al español",
+              "pm.test(\"CP-022: Validar que la Pokédex contenga descripciones en Español ('es')\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    ",
+              "    // Extraemos el arreglo de textos descriptivos",
+              "    var entradas = jsonData.flavor_text_entries;",
+              "    ",
+              "    // Buscamos si alguna entrada tiene el lenguaje 'es'",
+              "    var tieneEspanol = entradas.some(function(entrada) {",
+              "        return entrada.language.name === \"es\";",
+              "    });",
+              "    ",
+              "    pm.expect(tieneEspanol).to.be.true;",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://pokeapi.co/api/v2/pokemon-species/pikachu",
+          "protocol": "https",
+          "host": ["pokeapi", "co"],
+          "path": ["api", "v2", "pokemon-species", "pikachu"]
         }
       },
       "response": []
