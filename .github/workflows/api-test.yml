@@ -1,0 +1,38 @@
+name: Ejecución Automatizada de QA - PokeAPI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run-api-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descarga de código
+        uses: actions/checkout@v4
+
+      - name: Configuracion de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Instalacion de dependencias
+        run: npm install
+
+      # Ejecutamos el script de tu package.json que genera el reporte
+      # Usamos continue-on-error para que el pipeline no se detenga si tu "Fallo Forzado" actúa
+      - name: Ejecucion de Pruebas y Generar Reporte
+        run: npm run test:report
+        continue-on-error: true
+
+      # ¡La magia! Esto guarda el HTML en la nube para que lo descargues
+      - name: Guardar Reporte Visual
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-newman-pokeapi
+          path: reports/report.html
